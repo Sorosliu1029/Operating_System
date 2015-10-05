@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "proc.h"
 
 /* ------------- process/thread mechanism design&implementation -------------
 (an simplified Linux process/thread mechanism )
@@ -114,6 +115,7 @@ alloc_proc(void) {
         proc->cr3 = boot_cr3;
         proc->flags = 0;
         memset(proc->name, 0, PROC_NAME_LEN);
+        proc->wakeup_times = 0;
     }
     return proc;
 }
@@ -221,12 +223,15 @@ find_proc(int pid) {
 int
 kernel_thread(int (*fn)(void *), void *arg, uint32_t clone_flags) {
     struct trapframe tf;
-    memset(&tf, 0, sizeof(struct trapframe));
-    tf.tf_cs = KERNEL_CS;
-    tf.tf_ds = tf.tf_es = tf.tf_ss = KERNEL_DS;
-    tf.tf_regs.reg_ebx = (uint32_t)fn;
-    tf.tf_regs.reg_edx = (uint32_t)arg;
-    tf.tf_eip = (uint32_t)kernel_thread_entry;
+    memset(&tf, 0, sizeof(struct trapframe));           // set all 0 to initialize
+    tf.tf_cs = KERNEL_CS;                               // set control stack
+    tf.tf_ds = tf.tf_es = tf.tf_ss = KERNEL_DS;         // set data stack
+    tf.tf_regs.reg_ebx = (uint32_t)fn;                  // put new process's function into register '%ebx'
+    tf.tf_regs.reg_edx = (uint32_t)arg;                 // put new process's arguments into register '%edx'
+    tf.tf_eip = (uint32_t)kernel_thread_entry;          // prepare for the new process
+                                                        // (push new process's return value into register '%eax'
+                                                        // and terminate current thread in kernel)
+                                                        // entry.S -> call do_exit maybe refer to the do_exit() below ?
     return do_fork(clone_flags | CLONE_VM, 0, &tf);
 }
 
@@ -302,26 +307,22 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
      */
 
     //    1. call alloc_proc to allocate a proc_struct
-    //    2. call setup_kstack to allocate a kernel stack for child process
-    //    3. call copy_mm to dup OR share mm according clone_flag
-    //    4. call copy_thread to setup tf & context in proc_struct
-    //    5. insert proc_struct into hash_list && proc_list
-    //    6. call wakeup_proc to make the new child process RUNNABLE
-    //    7. set ret vaule using child proc's pid
     if ((proc = alloc_proc()) == NULL) {
         goto fork_out;
     }
-
     proc->parent = current;
 
+    //    2. call setup_kstack to allocate a kernel stack for child process
     if (setup_kstack(proc) != 0) {
         goto bad_fork_cleanup_proc;
     }
+    //    3. call copy_mm to dup OR share mm according clone_flag
     if (copy_mm(clone_flags, proc) != 0) {
         goto bad_fork_cleanup_kstack;
     }
+    //    4. call copy_thread to setup tf & context in proc_struct
     copy_thread(proc, stack, tf);
-
+    //    5. insert proc_struct into hash_list && proc_list
     bool intr_flag;
     local_intr_save(intr_flag);
     {
@@ -331,9 +332,9 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         nr_process ++;
     }
     local_intr_restore(intr_flag);
-
+    //    6. call wakeup_proc to make the new child process RUNNABLE
     wakeup_proc(proc);
-
+    //    7. set ret vaule using child proc's pid
     ret = proc->pid;
 fork_out:
     return ret;
@@ -360,6 +361,7 @@ init_main(void *arg) {
     cprintf("this initproc, pid = %d, name = \"%s\"\n", current->pid, get_proc_name(current));
     cprintf("To U: \"%s\".\n", (const char *)arg);
     cprintf("To U: \"en.., Bye, Bye. :)\"\n");
+    cprintf("Wakeup Times: %d\n", current->wakeup_times);
     return 0;
 }
 
