@@ -19654,7 +19654,7 @@ c010a279:	e8 90 fe ff ff       	call   c010a10e <copy_thread>
     local_intr_save(intr_flag);
 c010a27e:	e8 59 f8 ff ff       	call   c0109adc <__intr_save>
 c010a283:	89 45 ec             	mov    %eax,-0x14(%ebp)
-    {
+    
         proc->pid = get_pid();
 c010a286:	e8 ff fa ff ff       	call   c0109d8a <get_pid>
 c010a28b:	8b 55 f0             	mov    -0x10(%ebp),%edx
@@ -19710,7 +19710,7 @@ c010a2ef:	89 10                	mov    %edx,(%eax)
 c010a2f1:	a1 00 bb 12 c0       	mov    0xc012bb00,%eax
 c010a2f6:	83 c0 01             	add    $0x1,%eax
 c010a2f9:	a3 00 bb 12 c0       	mov    %eax,0xc012bb00
-    }
+
     local_intr_restore(intr_flag);
 c010a2fe:	8b 45 ec             	mov    -0x14(%ebp),%eax
 c010a301:	89 04 24             	mov    %eax,(%esp)

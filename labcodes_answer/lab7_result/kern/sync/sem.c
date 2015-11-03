@@ -13,6 +13,8 @@ sem_init(semaphore_t *sem, int value) {
     wait_queue_init(&(sem->wait_queue));
 }
 
+//具体实现信号量的V操作,首先关中断,如果信号量对应的wait queue中没有进程在等待,直接把信号量的value加一,然后开中断返回;
+//如果有进程在等待且进程等待的原因是semophore设置的,则调用wakeup_wait函数将waitqueue中等待的第一个wait删除,且把此wait关联的进程唤醒,最后开中断返回。
 static __noinline void __up(semaphore_t *sem, uint32_t wait_state) {
     bool intr_flag;
     local_intr_save(intr_flag);
@@ -29,6 +31,10 @@ static __noinline void __up(semaphore_t *sem, uint32_t wait_state) {
     local_intr_restore(intr_flag);
 }
 
+//具体实现信号量的P操作,首先关掉中断,然后判断当前信号量的value是否大于0。
+//如果是>0,则表明可以获得信号量,故让value减一,并打开中断返回即可;
+//如果不是>0,则表明无法获得信号量,故需要将当前的进程加入到等待队列中,并打开中断,然后运行调度器选择另外一个进程执行。
+//如果被V操作唤醒,则把自身关联的wait从等待队列中删除(此过程需要先关中断,完成后开中断)。
 static __noinline uint32_t __down(semaphore_t *sem, uint32_t wait_state) {
     bool intr_flag;
     local_intr_save(intr_flag);
