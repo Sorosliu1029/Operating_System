@@ -1,3 +1,6 @@
 .idea
 *.img
 bin
+obj
+.qemu.out
+.gdb.in
