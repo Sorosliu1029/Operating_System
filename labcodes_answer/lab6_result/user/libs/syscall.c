@@ -80,3 +80,8 @@ sys_lab6_set_priority(uint32_t priority)
 {
     syscall(SYS_lab6_set_priority, priority);
 }
+
+int
+sys_getwakeup_times(int pid) {
+    return syscall(SYS_getwakeup_times, pid);
+}

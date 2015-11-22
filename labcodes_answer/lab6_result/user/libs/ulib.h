@@ -34,5 +34,7 @@ void print_pgdir(void);
 unsigned int gettime_msec(void);
 void lab6_set_priority(uint32_t priority);
 
+int getwakeup_times(int pid);
+
 #endif /* !__USER_LIBS_ULIB_H__ */
 

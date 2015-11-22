@@ -56,3 +56,8 @@ lab6_set_priority(uint32_t priority)
 {
     sys_lab6_set_priority(priority);
 }
+
+int
+getwakeup_times(int pid) {
+    return sys_getwakeup_times(pid);
+}

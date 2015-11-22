@@ -12,5 +12,7 @@ int sys_pgdir(void);
 /* FOR LAB6 ONLY */
 void sys_lab6_set_priority(uint32_t priority);
 
+int sys_getwakeup_times(int pid);
+
 #endif /* !__USER_LIBS_SYSCALL_H__ */
 

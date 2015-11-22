@@ -77,6 +77,11 @@ sys_lab6_set_priority(uint32_t arg[])
     return 0;
 }
 
+static uint32_t
+sys_getwakeup_times(uint32_t arg[]) {
+    return current->wakeup_times;
+}
+
 static int (*syscalls[])(uint32_t arg[]) = {
     [SYS_exit]              sys_exit,
     [SYS_fork]              sys_fork,
@@ -88,6 +93,7 @@ static int (*syscalls[])(uint32_t arg[]) = {
     [SYS_putc]              sys_putc,
     [SYS_pgdir]             sys_pgdir,
     [SYS_gettime]           sys_gettime,
+    [SYS_getwakeup_times]   sys_getwakeup_times,
     [SYS_lab6_set_priority] sys_lab6_set_priority,
 };
 

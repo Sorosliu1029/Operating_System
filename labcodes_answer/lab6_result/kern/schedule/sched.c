@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <default_sched.h>
+#include "../process/proc.h"
 
 // the list of timer
 static list_entry_t timer_list;
@@ -63,6 +64,7 @@ wakeup_proc(struct proc_struct *proc) {
     {
         if (proc->state != PROC_RUNNABLE) {
             proc->state = PROC_RUNNABLE;
+            proc->wakeup_times++;
             proc->wait_state = 0;
             if (proc != current) {
                 sched_class_enqueue(proc);
