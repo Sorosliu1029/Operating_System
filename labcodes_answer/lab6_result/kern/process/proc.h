@@ -97,7 +97,6 @@ int do_kill(int pid);
 //FOR LAB6, set the process's priority (bigger value will get more CPU time) 
 void lab6_set_priority(uint32_t priority);
 
-//int get_wakeup_times(int pid);
 
 #endif /* !__KERN_PROCESS_PROC_H__ */
 

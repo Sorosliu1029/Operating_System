@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
-#include "proc.h"
 
 /* ------------- process/thread mechanism design&implementation -------------
 (an simplified Linux process/thread mechanism )
@@ -417,6 +416,8 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 
     proc->parent = current;
     assert(current->wait_state == 0);
+
+    proc->wakeup_times = current->wakeup_times;
 
     if (setup_kstack(proc) != 0) {
         goto bad_fork_cleanup_proc;
@@ -902,12 +903,3 @@ lab6_set_priority(uint32_t priority)
         current->lab6_priority = 1;
     else current->lab6_priority = priority;
 }
-
-//int
-//get_wakeup_times(int pid) {
-//    struct proc_struct *proc;
-//    if ((proc = find_proc(pid)) != NULL) {
-//        return proc->wakeup_times;
-//    }
-//    return 0;
-//}
