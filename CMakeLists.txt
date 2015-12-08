@@ -1784,6 +1784,6 @@ set(SOURCE_FILES
     LICENSE
     opensource_os_list.md
     README-english.md
-    README.md)
+    README.md labcodes_answer/lab6_result/user/print.c)
 
 add_executable(ucore_lab ${SOURCE_FILES})

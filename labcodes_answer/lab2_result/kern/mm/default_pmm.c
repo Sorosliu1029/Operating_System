@@ -109,6 +109,8 @@ default_alloc_pages(size_t n) {
         ClearPageProperty(p);
         SetPageReserved(p);
         nr_free -= n;
+//          struct Page *pg = le2page(&free_list, page_link);
+//          cprintf("%d\n", pg->property);
         return p;
       }
     }
